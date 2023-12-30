@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: ml-scratch
 spec:
+  type: LoadBalancer
   selector:
     app: ml-scratch
   ports:
