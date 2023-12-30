@@ -17,7 +17,7 @@ spec:
         image: varshitdusad/ml-from-scratch:0.0.1
         resources:
           limits:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "500m"
         ports:
         - containerPort: 8501
