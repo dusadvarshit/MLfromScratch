@@ -17,3 +17,6 @@ st.markdown("8. Perceptron")
 st.markdown("9. Support Vector Machine")
 st.markdown("10. K-Means Clustering")
 
+
+number = st.number_input('Insert a number')
+st.write('The current number is ', number)
