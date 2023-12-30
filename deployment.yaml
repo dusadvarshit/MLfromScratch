@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-scratch-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-scratch
+  template:
+    metadata:
+      labels:
+        app: ml-scratch
+    spec:
+      containers:
+      - name: ml-scratch-pod
+        image: varshitdusad/ml-from-scratch:0.0.1
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8501
