@@ -1,89 +1,106 @@
 import streamlit as st
-import os
 import numpy as np
-import cv2
-import tensorflow as tf 
-from pages.submodules.cartoonize import network, guided_filter
 import matplotlib.pyplot as plt
-from PIL import Image
-from skimage.color import rgb2gray
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
+st.title("Linear Regression")
 
+st.subheader('Theory')
+on = st.toggle(">")
 
-def resize_crop(image):
-    h, w, c = np.shape(image)
-    if min(h, w) > 720:
-        if h > w:
-            h, w = int(720*h/w), 720
-        else:
-            h, w = 720, int(720*w/h)
-    image = cv2.resize(image, (w, h),
-                       interpolation=cv2.INTER_AREA)
-    h, w = (h//8)*8, (w//8)*8
-    image = image[:h, :w, :]
-    return image
+## Writing Theory 
+if on:
+    st.write("""Linear Regression is a Machine Learning based modeling technique where 
+             a independent variable is modelled as a weighted sum of one or more dependent variable.
+             """)
     
-
-def cartoonize(image, model_path):
-    input_photo = tf.placeholder(tf.float32, [1, None, None, 3])
-
-    network_out = network.unet_generator(input_photo)
-        
-    final_out = guided_filter.guided_filter(input_photo, network_out, r=1, eps=5e-3)
-
-    all_vars = tf.trainable_variables()
-    gene_vars = [var for var in all_vars if 'generator' in var.name]
-    saver = tf.train.Saver(var_list=gene_vars)
+    st.write("""The model is considered to be linear. This means for a specific change 
+             in one unit of $$X$$, we can determine it's impact on $$y$$.""")
     
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    sess = tf.Session(config=config)
-
-    sess.run(tf.global_variables_initializer())
-    saver.restore(sess, tf.train.latest_checkpoint(model_path))
+    st.write("""Mathematically, the linear regression is represented by:""")
     
-    # try:
-    image = resize_crop(image)
-    batch_image = image.astype(np.float32)/127.5 - 1
-    batch_image = np.expand_dims(batch_image, axis=0)
-    output = sess.run(final_out, feed_dict={input_photo: batch_image})
-    output = (np.squeeze(output)+1)*127.5
-    output = np.clip(output, 0, 255).astype(np.uint8)
-    return output
-    # except:
-    #     print('cartoonize failed')
+    st.latex(r'''
+    f(x) = \beta_{0} + \beta_{0}X_{1} + \beta_{0}X_{2} .... + \beta_{0}X_{p}
+    ''')
+
+    st.write("""Do note that Linear Regression is almost always an approximation 
+             of the real world.""")
+    
+    st.write("""The quality of the fit of a Linear Regression model is measured by:""")
+
+    st.latex(r'''
+    MSE = \frac{1}{n}\Sigma_{i=1}^{n}(y_{i} - \hat{f}(x_{i}))^2
+    ''')
+
+    st.write("""Notice the little hat symbol on f: $$\hat{f}$$ - it represents
+             that we only have an estimate of $$f$$. Not it's exact function. 
+             Getting exact function is almost impossible in real world.""")
+
+st.divider()
 
 
-st.title('Cartoonize Your Image')
-st.subheader('Only jpeg, jpg and png allowed')
+### Logic Code
 
-img_file = st.file_uploader(label="Upload your picture", type=['jpg', 'jpeg', 'png'])
+class LinearRegression:
 
-model_path = "pages/submodules/cartoonize/saved_models"
+    def __init__(self, lr = 0.001, n_iters=1000):
+        self.lr = lr
+        self.n_iters = n_iters
+        self.weights = None
+        self.bias = None
 
-flag = False
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+        self.weights = np.zeros(n_features)
+        self.bias = 0
 
-if img_file!= None:
-    st.subheader("Your Image")
-    st.image(img_file)
+        for _ in range(self.n_iters):
+            y_pred = np.dot(X, self.weights) + self.bias
 
-    image = Image.open(img_file)
-    img_array = np.array(image)
+            dw = (1/n_samples) * np.dot(X.T, (y_pred-y))
+            db = (1/n_samples) * np.sum(y_pred-y)
 
-    cartoon_subheader = st.subheader("Wait for Cartoonized Image")
+            self.weights = self.weights - self.lr * dw
+            self.bias = self.bias - self.lr * db
 
-    cartoon_file = cartoonize(img_array, model_path)
-    flag = True
+    def predict(self, X):
+        y_pred = np.dot(X, self.weights) + self.bias
+        return y_pred
+    
+def mse(y_test, predictions):
+  mse = np.mean((y_test-predictions)**2)
+  return mse
 
-
-if flag== True:
-    cartoon_subheader.subheader('Here is your Cartoonized Image')
-    st.image(cartoon_file)
-
-
-
-
-
+X, y = datasets.make_regression(n_samples=100, n_features=1, noise=20, random_state=4)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
 
 
+reg = LinearRegression()
+reg.fit(X_train, y_train)
+prediction_train = reg.predict(X_train)
+predictions = reg.predict(X_test)
 
+mse = mse(y_test, predictions)
+
+
+fig, ax = plt.subplots()
+ax.scatter(X_train[:, 0], y_train, color = "b", marker = "o", s = 30)
+ax.plot(X_train[:, 0], prediction_train, color = "r",)
+ax.set_xlabel("Independent Variable")
+ax.set_ylabel("Dependent Variable")
+ax.set_title("Training Raw Data and it's Linear Regression")
+
+st.pyplot(fig)
+
+
+fig, ax = plt.subplots()
+ax.scatter(X_test[:, 0], y_test, color = "b", marker = "o", s = 30)
+ax.plot(X_test[:, 0], predictions, color = "r",)
+ax.set_xlabel("Independent Variable")
+ax.set_ylabel("Dependent Variable")
+ax.set_title("Test Raw Data and it's Linear Regression")
+
+st.pyplot(fig)
+
+st.subheader(f"Mean Squared Error: {np.round(mse, 2)}")
