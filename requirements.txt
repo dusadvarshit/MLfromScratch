@@ -1,0 +1,4 @@
+matplotlib
+streamlit==1.29.0
+numpy
+scikit-learn
