@@ -1,22 +1,26 @@
 import streamlit as st
 
-st.button("Reset")
-if st.button('Say hello ✅'):
-    st.write('Why hello there')
-else:
-    st.write('Goodbye')
+st.title("Linear Regression")
 
+st.subheader('Theory')
+on = st.toggle(">")
 
-a = st.button("Yayay")
-st.write(a)
+## Writing Theory 
+if on:
+    st.write("""Linear Regression is a Machine Learning based modeling technique where 
+             a independent variable is modelled as a weighted sum of one or more dependent variable.
+             """)
+    
+    st.write("""The model is considered to be linear. This means for a specific change 
+             in one unit of $$X$$, we can determine it's impact on $$y$$.""")
+    
+    st.write("""Mathematically, the linear regression is represented by:""")
+    
+    st.latex(r'''
+    f(x) = \beta_{0} + \beta_{0}X_{1} + \beta_{0}X_{2} .... + \beta_{0}X_{p}
+    ''')
 
-st.write("$ a' \\beta $")
+    st.write("""Do note that Linear Regression is almost always an approximation 
+             of the real world.""")
 
-
-animal_shelter = ['cat', 'dog', 'rabbit', 'bird']
-
-animal = st.text_input('Type an animal')
-
-if st.button('Check availability'):
-    have_it = animal.lower() in animal_shelter
-    'We have that animal!' if have_it else 'We don\'t have that animal.'
+st.divider()
