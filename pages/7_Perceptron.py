@@ -1,26 +1,96 @@
 import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
 
-st.title("Linear Regression")
+
+st.title("Perceptron")
 
 st.subheader('Theory')
 on = st.toggle(">")
 
 ## Writing Theory 
 if on:
-    st.write("""Linear Regression is a Machine Learning based modeling technique where 
-             a independent variable is modelled as a weighted sum of one or more dependent variable.
+    st.write("""Perceptron is the earliest version of neural network.
+                Unlike today's version it does not involve any crazy 
+                activation functions or deep layers.
+                But, it does do a good job as a classifier.
              """)
-    
-    st.write("""The model is considered to be linear. This means for a specific change 
-             in one unit of $$X$$, we can determine it's impact on $$y$$.""")
-    
-    st.write("""Mathematically, the linear regression is represented by:""")
-    
-    st.latex(r'''
-    f(x) = \beta_{0} + \beta_{0}X_{1} + \beta_{0}X_{2} .... + \beta_{0}X_{p}
-    ''')
-
-    st.write("""Do note that Linear Regression is almost always an approximation 
-             of the real world.""")
 
 st.divider()
+
+def accuracy(y_true, y_pred):
+    accuracy = np.sum(y_true == y_pred) / len(y_true)
+    return accuracy
+
+def unit_step_func(x): # ReLU function
+  return np.where(x>0, 1, 0)
+
+class Perceptron:
+  def __init__(self, lr = 0.01, n_iters=1000):
+    self.lr = lr
+    self.n_iters = n_iters
+    self.activation_func = unit_step_func
+    self.weights = None
+    self.bias = None
+
+  def fit(self, X, y):
+    n_samples, n_features = X.shape
+
+    # Init Parameters
+    self.weights = np.zeros(n_features)
+    self.bias = 0
+
+    y_ = np.where(y>0, 1, 0)
+
+    # Learn Weights
+    for _ in range(self.n_iters):
+      for idx, x_i in enumerate(X):
+        linear_output = np.dot(x_i, self.weights) + self.bias
+        y_predicted = self.activation_func(linear_output)
+
+        # Perceptron Update rule
+        update = self.lr * (y_[idx] - y_predicted)
+        self.weights += update * x_i
+        self.bias += update
+
+
+  def predict(self, X):
+    linear_output = np.dot(X, self.weights) + self.bias
+    y_predicted = self.activation_func(linear_output)
+    return y_predicted
+
+##---
+X, y = datasets.make_blobs(
+    n_samples=150, n_features=2, centers=2, cluster_std=1.05, random_state=2
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=123
+)
+
+p = Perceptron(lr=0.01, n_iters=1000)
+p.fit(X_train, y_train)
+predictions = p.predict(X_test)
+
+## Plot figure
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+plt.scatter(X_train[:, 0], X_train[:, 1], marker="o", c=y_train)
+
+x0_1 = np.amin(X_train[:, 0])
+x0_2 = np.amax(X_train[:, 0])
+
+x1_1 = (-p.weights[0] * x0_1 - p.bias) / p.weights[1]
+x1_2 = (-p.weights[0] * x0_2 - p.bias) / p.weights[1]
+
+ax.plot([x0_1, x0_2], [x1_1, x1_2], "k")
+
+ymin = np.amin(X_train[:, 1])
+ymax = np.amax(X_train[:, 1])
+ax.set_ylim([ymin - 3, ymax + 3])
+
+st.pyplot(fig)
+
+st.write("Perceptron classification accuracy", accuracy(y_test, predictions))
+
