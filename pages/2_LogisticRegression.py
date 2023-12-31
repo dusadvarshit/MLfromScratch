@@ -1,4 +1,7 @@
 import streamlit as st
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
 
 st.title("Linear Regression")
 
@@ -7,20 +10,65 @@ on = st.toggle(">")
 
 ## Writing Theory 
 if on:
-    st.write("""Linear Regression is a Machine Learning based modeling technique where 
-             a independent variable is modelled as a weighted sum of one or more dependent variable.
+    st.write("""Logistic Regression is a Machine Learning based classifier 
+             which identifies which category or class does the input belongs to.
              """)
     
-    st.write("""The model is considered to be linear. This means for a specific change 
-             in one unit of $$X$$, we can determine it's impact on $$y$$.""")
+    st.write("""In principle, it uses the same linear model as Linear Regression 
+    but it also applies a sigmoid function on top of it which """)
     
-    st.write("""Mathematically, the linear regression is represented by:""")
     
-    st.latex(r'''
-    f(x) = \beta_{0} + \beta_{0}X_{1} + \beta_{0}X_{2} .... + \beta_{0}X_{p}
-    ''')
-
-    st.write("""Do note that Linear Regression is almost always an approximation 
-             of the real world.""")
+    # st.latex(r'''
+    # f(x) = \beta_{0} + \beta_{0}X_{1} + \beta_{0}X_{2} .... + \beta_{0}X_{p}
+    # ''')
 
 st.divider()
+
+def sigmoid(x):
+  return 1/(1+np.exp(-x)) ## Provide probability range between [0,1]
+
+def accuracy(y_pred, y_test):
+  return np.sum(y_pred==y_test)/len(y_test)
+
+class LogisticRegression():
+  def __init__(self, lr=0.001, n_iters=1000):
+    self.lr = lr
+    self.n_iters = n_iters
+    self.weights = None
+    self.bias = None
+
+  def fit(self, X, y):
+    n_samples, n_features = X.shape
+    self.weights = np.zeros(n_features)
+    self.bias= 0
+
+    for _ in range(self.n_iters):
+      linear_pred = np.dot(X, self.weights) + self.bias
+      predictions = sigmoid(linear_pred)
+
+      dw = (1/n_samples) * np.dot(X.T, (predictions-y))
+      db = (1/n_samples) * np.sum(predictions-y)
+
+      self.weights = self.weights - self.lr*dw
+      self.bias = self.bias - self.lr*db
+
+  def predict(self, X):
+    linear_pred = np.dot(X, self.weights) + self.bias
+    y_pred = sigmoid(linear_pred)
+    class_pred = [0 if y<=0.5 else 1 for y in y_pred]
+    return class_pred
+
+bc = datasets.load_breast_cancer()
+X, y = bc.data, bc.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+
+clf = LogisticRegression(lr=0.01)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+acc = accuracy(y_pred, y_test)
+
+st.write("""We are working with diabetes dataset. It has 569 samples, 30 features
+and 2 labels.
+             """)
+print(f"Accuracy: {acc}")
