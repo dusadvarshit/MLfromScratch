@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
 
-st.title("Linear Regression")
+st.title("Logistic Regression")
 
 st.subheader('Theory')
 on = st.toggle(">")
@@ -71,4 +71,4 @@ acc = accuracy(y_pred, y_test)
 st.write("""We are working with diabetes dataset. It has 569 samples, 30 features
 and 2 labels.
              """)
-print(f"Accuracy: {acc}")
+st.write(f"Accuracy: {np.round(acc, 2)}")
