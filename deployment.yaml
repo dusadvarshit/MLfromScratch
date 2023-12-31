@@ -15,6 +15,7 @@ spec:
       containers:
       - name: ml-scratch-pod
         image: varshitdusad/ml-from-scratch:0.0.1
+        imagePullPolicy: "Always"
         resources:
           limits:
             memory: "512Mi"
