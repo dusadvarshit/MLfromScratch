@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
-st.title("Linear Regression")
+st.title("Linear Regression:V2")
 
 st.subheader('Theory')
 on = st.toggle(">")
