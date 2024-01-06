@@ -5,7 +5,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 
-st.title("Random Forrest")
+st.title("Random Forest")
 
 st.subheader('Theory')
 on = st.toggle(">")
