@@ -5,7 +5,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 
-st.title("Linear Regression")
+st.title("Decision Trees")
 
 st.subheader('Theory')
 on = st.toggle(">")
@@ -147,4 +147,4 @@ def accuracy(y_test, y_pred):
     return np.sum(y_test == y_pred) / len(y_test)
 
 acc = accuracy(y_test, predictions)
-st.write(f"Accuracy using decision trees:{acc}")
+st.write(f"Accuracy using decision trees: {acc}")
