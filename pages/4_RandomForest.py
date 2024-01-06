@@ -185,4 +185,4 @@ clf.fit(X_train, y_train)
 predictions = clf.predict(X_test)
 
 acc =  accuracy(y_test, predictions)
-st.write(f"Accuracy using decision trees: {acc}")
+st.write(f"Accuracy using Random Forest: {acc}")
